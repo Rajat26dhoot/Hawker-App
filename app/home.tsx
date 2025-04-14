@@ -67,7 +67,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome to Home!</Text>
+      <Text style={styles.welcomeText}>Welcome to HawkeRoute!</Text>
 
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/addproduct")}>
