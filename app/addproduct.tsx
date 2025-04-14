@@ -11,17 +11,16 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import api from "../lib/api"; // import your API instance
-import AsyncStorage from "@react-native-async-storage/async-storage"; // import AsyncStorage
+import api from "../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddProductModal(): JSX.Element {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [price, setPrice] = useState<string>("");
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [isAvailable] = useState<boolean>(true); // default true
+  const [isAvailable] = useState<boolean>(true);
 
-  // Pick image from gallery
   const handlePickImage = async (): Promise<void> => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -39,7 +38,6 @@ export default function AddProductModal(): JSX.Element {
     }
   };
 
-  // Handle submit product form
   const handleSubmit = async (): Promise<void> => {
     if (!name || !description || !price || !imageUri) {
       Alert.alert("⚠️ Missing Fields", "Please fill all fields and upload an image.");
@@ -47,7 +45,6 @@ export default function AddProductModal(): JSX.Element {
     }
 
     try {
-      // Get the token from AsyncStorage
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -55,30 +52,43 @@ export default function AddProductModal(): JSX.Element {
         return;
       }
 
+      // Upload image to Cloudinary
+      const formData = new FormData();
+      formData.append("file", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "upload.jpg",
+      } as any);
+      formData.append("upload_preset", "Arnab123"); // replace with your actual preset
+
+      const cloudinaryRes = await fetch("https://api.cloudinary.com/v1_1/dzaodsk70/image/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const cloudinaryData = await cloudinaryRes.json();
+      const imageUrl = cloudinaryData.secure_url;
+      console.log(imageUrl);
+
       const productData = {
         name,
         description,
         price: parseFloat(price),
-        image_url: imageUri, // Assuming the image URL is passed as a string (you may need to upload the image first)
+        image_url: imageUrl,
         is_available: true,
       };
 
-      // Send the product data to the backend
       const response = await api.post("/api/products", productData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token for authentication
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      // Handle success
       Alert.alert("✅ Product Added", response.data.message || "Product added successfully!");
-      router.back(); // Go back to the previous screen after submission
+      router.back();
     } catch (error) {
       console.error("Add product error:", error);
-      Alert.alert(
-        "❌ Failed to Add Product",
-        error.response?.data?.message || "Something went wrong."
-      );
+      Alert.alert("❌ Failed to Add Product", error.response?.data?.message || "Something went wrong.");
     }
   };
 
@@ -87,7 +97,6 @@ export default function AddProductModal(): JSX.Element {
       <Text style={styles.title}>Add New Product</Text>
 
       <View style={styles.form}>
-        {/* Image Picker */}
         <TouchableOpacity onPress={handlePickImage} style={styles.imagePicker}>
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.image} />
@@ -96,7 +105,6 @@ export default function AddProductModal(): JSX.Element {
           )}
         </TouchableOpacity>
 
-        {/* Product Name */}
         <TextInput
           placeholder="Product Name"
           value={name}
@@ -104,7 +112,6 @@ export default function AddProductModal(): JSX.Element {
           style={styles.input}
         />
 
-        {/* Product Description */}
         <TextInput
           placeholder="Description"
           value={description}
@@ -113,7 +120,6 @@ export default function AddProductModal(): JSX.Element {
           style={[styles.input, styles.textArea]}
         />
 
-        {/* Product Price */}
         <TextInput
           placeholder="Price"
           value={price}
@@ -122,7 +128,6 @@ export default function AddProductModal(): JSX.Element {
           style={styles.input}
         />
 
-        {/* Save Product Button */}
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Save Product</Text>
         </TouchableOpacity>

@@ -1,24 +1,32 @@
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsReady(true);
-    }, 0);
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
 
-    return () => clearTimeout(timeout);
+        if (token) {
+          router.replace("/home"); // 👈 Redirect to home if token exists
+        } else {
+          router.replace("/login"); // 👈 Redirect to login if no token
+        }
+      } catch (error) {
+        console.error("Error checking token:", error);
+        router.replace("/login"); // 👈 Fallback to login on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
-
-  useEffect(() => {
-    if (isReady) {
-      router.replace("/home"); // 👈 Redirect to home
-    }
-  }, [isReady]);
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

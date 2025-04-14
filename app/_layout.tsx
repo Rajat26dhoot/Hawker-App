@@ -4,10 +4,12 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="home" options={{ title: "Home" }} />
-      <Stack.Screen name="login" options={{ title: "Login" }} />
-      <Stack.Screen name="singup" options={{ title: "Sign Up" }} />
-    
+      <Stack.Screen name="home" options={{headerShown: false}} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+
+
+
+      <Stack.Screen name="singup" options={{headerShown: false  }} />
 
       {/* Modal screen for Add Product */}
       <Stack.Screen
@@ -18,14 +20,29 @@ export default function RootLayout() {
         }}
       />
 
-            <Stack.Screen
-              name="maps"
-              options={{
-                presentation: "modal",  // Treat maps as a modal
-                title: "Maps",
-              }}
-            />
+      <Stack.Screen
+        name="maps"
+        options={{
+          presentation: "modal",  // Treat maps as a modal
+          title: "Maps",
+        }}
+      />
 
+      <Stack.Screen
+        name="sellproductdetail"
+        options={{
+          presentation: "modal",  
+          title: "Sell Product Detail",
+        }}
+      />
+
+      {/* Profile screen */}
+      <Stack.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+        }}
+      />
     </Stack>
   );
 }
